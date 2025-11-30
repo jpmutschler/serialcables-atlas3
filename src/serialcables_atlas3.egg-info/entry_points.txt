@@ -1,0 +1,2 @@
+[console_scripts]
+atlas3-cli = serialcables_atlas3.cli:main

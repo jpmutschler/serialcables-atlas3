@@ -19,7 +19,7 @@ A Python library for controlling the Serial Cables Atlas3 PCIe Gen6 Host Adapter
 
 The Atlas3 Host Adapter Card features the **Broadcom PEX90144 PCIe Gen6 Switch** supporting:
 - Up to 144 lanes and 72 ports
-- Nine 16-lane stations
+- Five 16-lane downstream stations
 - PCIe Gen6 (64 GT/s) with FLIT mode
 - Ultra low latency with FLIT & FEC
 - Dynamic Port Reconfiguration (DPR)

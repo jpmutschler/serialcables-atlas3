@@ -28,29 +28,34 @@ Examples:
     )
 
     parser.add_argument(
-        "-V", "--version",
+        "-V",
+        "--version",
         action="version",
         version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
-        "-p", "--port",
+        "-p",
+        "--port",
         required=True,
         help="Serial port (e.g., /dev/ttyUSB0 or COM3)",
     )
     parser.add_argument(
-        "-b", "--baudrate",
+        "-b",
+        "--baudrate",
         type=int,
         default=115200,
         help="Serial baudrate (default: 115200)",
     )
     parser.add_argument(
-        "-t", "--timeout",
+        "-t",
+        "--timeout",
         type=float,
         default=5.0,
         help="Command timeout in seconds (default: 5.0)",
     )
     parser.add_argument(
-        "-j", "--json",
+        "-j",
+        "--json",
         action="store_true",
         help="Output in JSON format",
     )
@@ -151,7 +156,8 @@ Examples:
         help="Register address (hex)",
     )
     reg_parser.add_argument(
-        "-c", "--count",
+        "-c",
+        "--count",
         type=int,
         default=16,
         help="Number of values to read",
@@ -183,7 +189,8 @@ Examples:
         help="Flash address (hex)",
     )
     flash_parser.add_argument(
-        "-c", "--count",
+        "-c",
+        "--count",
         type=int,
         default=16,
         help="Number of values to read",
@@ -404,7 +411,11 @@ def main(args: Optional[list] = None) -> int:
                 if parsed.value:
                     enable = parsed.value in ["enable", "en"]
                     success = card.set_clock_output(enable)
-                    print(f"Clock output {'enabled' if enable else 'disabled'}" if success else "Failed")
+                    print(
+                        f"Clock output {'enabled' if enable else 'disabled'}"
+                        if success
+                        else "Failed"
+                    )
                     return 0 if success else 1
                 else:
                     status = card.get_clock_status()
@@ -419,7 +430,7 @@ def main(args: Optional[list] = None) -> int:
                         station = int(station)
                     disable = parsed.state == "on"
                     success = card.set_flit_mode(station, disable)
-                    print(f"Flit mode set" if success else "Failed")
+                    print("Flit mode set" if success else "Failed")
                     return 0 if success else 1
                 else:
                     status = card.get_flit_status()

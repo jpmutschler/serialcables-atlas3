@@ -7,9 +7,7 @@ import serial
 from serial.tools import list_ports
 
 from .exceptions import (
-    CommandError,
     ConnectionError,
-    FirmwareUpdateError,
     InvalidParameterError,
     TimeoutError,
 )
@@ -17,9 +15,9 @@ from .models import (
     AllErrorCounters,
     BistResult,
     ClockStatus,
+    FirmwareType,
     FlashDump,
     FlitStatus,
-    FirmwareType,
     HostCardInfo,
     I2CReadResult,
     I2CWriteResult,
@@ -601,9 +599,7 @@ class Atlas3:
             >>> print(hex(dump.values[0x60800000]))
         """
         if address < 0 or address > 0xFFFFFFFC:
-            raise InvalidParameterError(
-                "address", hex(address), "0x00000000 - 0xFFFFFFFC"
-            )
+            raise InvalidParameterError("address", hex(address), "0x00000000 - 0xFFFFFFFC")
 
         cmd = f"dr {address:x}"
         if count != 16:
@@ -627,13 +623,9 @@ class Atlas3:
             >>> card.write_register(0xFFF0017C, 0xFFFFFFFF)
         """
         if address < 0 or address > 0xFFFFFFFC:
-            raise InvalidParameterError(
-                "address", hex(address), "0x00000000 - 0xFFFFFFFC"
-            )
+            raise InvalidParameterError("address", hex(address), "0x00000000 - 0xFFFFFFFC")
         if data < 0 or data > 0xFFFFFFFF:
-            raise InvalidParameterError(
-                "data", hex(data), "0x00000000 - 0xFFFFFFFF"
-            )
+            raise InvalidParameterError("data", hex(data), "0x00000000 - 0xFFFFFFFF")
 
         response = self._send_command(f"mw {address:x} {data:x}")
         # mw command typically doesn't return success message
@@ -673,9 +665,7 @@ class Atlas3:
             >>> dump = card.read_flash(0x400)
         """
         if address < 0 or address > 0xFFFFFFFC:
-            raise InvalidParameterError(
-                "address", hex(address), "0x00000000 - 0xFFFFFFFC"
-            )
+            raise InvalidParameterError("address", hex(address), "0x00000000 - 0xFFFFFFFC")
 
         cmd = f"df {address:x}"
         if count != 16:
@@ -757,9 +747,7 @@ class Atlas3:
             raise InvalidParameterError("data length", str(len(data)), "1 - 128")
 
         data_str = " ".join(f"{b:x}" for b in data)
-        response = self._send_command(
-            f"iicw {address:x} {connector} {channel.lower()} {data_str}"
-        )
+        response = self._send_command(f"iicw {address:x} {connector} {channel.lower()} {data_str}")
         return parse_iicw(response, address, connector, channel, data)
 
     # =========================================================================
@@ -804,9 +792,7 @@ class Atlas3:
             fw_type = firmware_type.lower()
 
         if fw_type not in ["mini", "main", "fw", "mcu"]:
-            raise InvalidParameterError(
-                "firmware_type", fw_type, "mini, main, fw, or mcu"
-            )
+            raise InvalidParameterError("firmware_type", fw_type, "mini, main, fw, or mcu")
 
         # This is a simplified implementation
         # Full implementation would use xmodem library
@@ -838,9 +824,7 @@ class Atlas3:
             fw_type = firmware_type.lower()
 
         if fw_type not in ["mini", "main", "fw", "mcu"]:
-            raise InvalidParameterError(
-                "firmware_type", fw_type, "mini, main, fw, or mcu"
-            )
+            raise InvalidParameterError("firmware_type", fw_type, "mini, main, fw, or mcu")
 
         response = self._send_command(f"fdl {fw_type}", timeout=10.0)
         return response

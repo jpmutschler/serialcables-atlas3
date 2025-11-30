@@ -1,7 +1,7 @@
 """Response parsers for Atlas3 CLI output."""
 
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from .exceptions import ParseError
 from .models import (
@@ -235,12 +235,14 @@ def parse_bist(response: str) -> BistResult:
             address = int(match.group(3), 16)
             status = match.group(4)
 
-            devices.append(I2CDevice(
-                channel=channel,
-                device_name=device_name,
-                address=address,
-                status=status,
-            ))
+            devices.append(
+                I2CDevice(
+                    channel=channel,
+                    device_name=device_name,
+                    address=address,
+                    status=status,
+                )
+            )
 
         return BistResult(devices=devices)
     except Exception as e:
@@ -260,15 +262,17 @@ def parse_counters(response: str) -> AllErrorCounters:
         for line in response.split("\n"):
             match = re.match(pattern, line.strip())
             if match:
-                counters.append(ErrorCounters(
-                    port_number=int(match.group(1)),
-                    port_rx=int(match.group(2), 16),
-                    bad_tlp=int(match.group(3), 16),
-                    bad_dllp=int(match.group(4), 16),
-                    rec_diag=int(match.group(5), 16),
-                    link_down=int(match.group(6), 16),
-                    flit_error=int(match.group(7), 16),
-                ))
+                counters.append(
+                    ErrorCounters(
+                        port_number=int(match.group(1)),
+                        port_rx=int(match.group(2), 16),
+                        bad_tlp=int(match.group(3), 16),
+                        bad_dllp=int(match.group(4), 16),
+                        rec_diag=int(match.group(5), 16),
+                        link_down=int(match.group(6), 16),
+                        flit_error=int(match.group(7), 16),
+                    )
+                )
 
         return AllErrorCounters(counters=counters)
     except Exception as e:
@@ -435,7 +439,9 @@ def parse_iicwr(response: str, address: int, connector: int, channel: str) -> I2
         raise ParseError(response, f"Failed to parse iicwr response: {e}")
 
 
-def parse_iicw(response: str, address: int, connector: int, channel: str, write_data: List[int]) -> I2CWriteResult:
+def parse_iicw(
+    response: str, address: int, connector: int, channel: str, write_data: List[int]
+) -> I2CWriteResult:
     """Parse the 'iicw' command response."""
     try:
         # Verify success from response

@@ -12,14 +12,11 @@ from serialcables_atlas3 import (
 from serialcables_atlas3.exceptions import InvalidParameterError, ParseError
 from serialcables_atlas3.models import (
     BistResult,
-    ClockStatus,
     ErrorCounters,
-    FlitStatus,
     HostCardInfo,
     I2CDevice,
     PortInfo,
     PortStatus,
-    SpreadStatus,
     VersionInfo,
 )
 from serialcables_atlas3.parsers import (
@@ -351,9 +348,6 @@ class TestImports:
             Atlas3,
             Atlas3Error,
             LinkSpeed,
-            LinkStatus,
-            PortStatus,
-            VersionInfo,
         )
 
         assert Atlas3 is not None

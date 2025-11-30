@@ -1,7 +1,7 @@
 """Data models for Atlas3 Host Adapter Card responses."""
 
-from dataclasses import dataclass, field
-from enum import Enum, auto
+from dataclasses import dataclass
+from enum import Enum
 from typing import Dict, List, Optional
 
 
@@ -219,14 +219,16 @@ class ErrorCounters:
     @property
     def has_errors(self) -> bool:
         """Check if any errors have occurred."""
-        return any([
-            self.port_rx,
-            self.bad_tlp,
-            self.bad_dllp,
-            self.rec_diag,
-            self.link_down,
-            self.flit_error,
-        ])
+        return any(
+            [
+                self.port_rx,
+                self.bad_tlp,
+                self.bad_dllp,
+                self.rec_diag,
+                self.link_down,
+                self.flit_error,
+            ]
+        )
 
 
 @dataclass

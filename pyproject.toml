@@ -1,0 +1,99 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "serialcables-atlas3"
+version = "0.1.0"
+description = "Python API for Serial Cables Atlas3 PCIe Gen6 Host Adapter Card"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Serial Cables", email = "support@serialcables.com"}
+]
+maintainers = [
+    {name = "Serial Cables", email = "support@serialcables.com"}
+]
+keywords = [
+    "pcie",
+    "gen6",
+    "atlas3",
+    "broadcom",
+    "pex90144",
+    "nvme",
+    "ssd",
+    "serial-cables",
+    "hardware",
+    "mcio"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Hardware",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "pyserial>=3.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "isort>=5.12",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+]
+docs = [
+    "sphinx>=6.0",
+    "sphinx-rtd-theme>=1.0",
+]
+
+[project.urls]
+Homepage = "https://serialcables.com"
+Documentation = "https://github.com/serialcables/serialcables-atlas3#readme"
+Repository = "https://github.com/serialcables/serialcables-atlas3"
+Issues = "https://github.com/serialcables/serialcables-atlas3/issues"
+
+[project.scripts]
+atlas3-cli = "serialcables_atlas3.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+serialcables_atlas3 = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+strict = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=serialcables_atlas3"

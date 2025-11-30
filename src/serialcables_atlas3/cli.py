@@ -4,10 +4,11 @@
 import argparse
 import json
 import sys
-from typing import Optional
+from typing import Any, Optional
 
 from . import Atlas3, __version__
 from .exceptions import Atlas3Error
+from .models import PortInfo
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -214,7 +215,7 @@ Examples:
     return parser
 
 
-def format_output(data: dict, as_json: bool) -> str:
+def format_output(data: dict[str, Any], as_json: bool) -> str:
     """Format output data."""
     if as_json:
         return json.dumps(data, indent=2, default=str)
@@ -299,7 +300,7 @@ def cmd_ports(card: Atlas3, args: argparse.Namespace) -> int:
     """Handle ports command."""
     status = card.get_port_status()
 
-    def port_to_dict(port):
+    def port_to_dict(port: PortInfo) -> dict[str, Any]:
         return {
             "station": port.station,
             "port": port.port_number,
@@ -340,7 +341,7 @@ def cmd_bist(card: Atlas3, args: argparse.Namespace) -> int:
     return 0 if result.all_passed else 1
 
 
-def main(args: Optional[list] = None) -> int:
+def main(args: Optional[list[str]] = None) -> int:
     """Main entry point."""
     parser = create_parser()
     parsed = parser.parse_args(args)
@@ -418,10 +419,10 @@ def main(args: Optional[list] = None) -> int:
                     )
                     return 0 if success else 1
                 else:
-                    status = card.get_clock_status()
-                    print(f"Straddle: {'enabled' if status.straddle_enabled else 'disabled'}")
-                    print(f"EXT MCIO: {'enabled' if status.ext_mcio_enabled else 'disabled'}")
-                    print(f"INT MCIO: {'enabled' if status.int_mcio_enabled else 'disabled'}")
+                    clock_status = card.get_clock_status()
+                    print(f"Straddle: {'enabled' if clock_status.straddle_enabled else 'disabled'}")
+                    print(f"EXT MCIO: {'enabled' if clock_status.ext_mcio_enabled else 'disabled'}")
+                    print(f"INT MCIO: {'enabled' if clock_status.int_mcio_enabled else 'disabled'}")
                     return 0
             elif parsed.command == "flit":
                 if parsed.station and parsed.state:
@@ -433,11 +434,11 @@ def main(args: Optional[list] = None) -> int:
                     print("Flit mode set" if success else "Failed")
                     return 0 if success else 1
                 else:
-                    status = card.get_flit_status()
-                    print(f"Station 2 flit disable: {'on' if status.station2 else 'off'}")
-                    print(f"Station 5 flit disable: {'on' if status.station5 else 'off'}")
-                    print(f"Station 7 flit disable: {'on' if status.station7 else 'off'}")
-                    print(f"Station 8 flit disable: {'on' if status.station8 else 'off'}")
+                    flit_status = card.get_flit_status()
+                    print(f"Station 2 flit disable: {'on' if flit_status.station2 else 'off'}")
+                    print(f"Station 5 flit disable: {'on' if flit_status.station5 else 'off'}")
+                    print(f"Station 7 flit disable: {'on' if flit_status.station7 else 'off'}")
+                    print(f"Station 8 flit disable: {'on' if flit_status.station8 else 'off'}")
                     return 0
             elif parsed.command == "sdb":
                 if parsed.target:
@@ -467,8 +468,8 @@ def main(args: Optional[list] = None) -> int:
                 return 0
             elif parsed.command == "reg-write":
                 addr = int(parsed.address, 16)
-                data = int(parsed.data, 16)
-                success = card.write_register(addr, data)
+                reg_data = int(parsed.data, 16)
+                success = card.write_register(addr, reg_data)
                 print("Written" if success else "Failed")
                 return 0 if success else 1
             elif parsed.command == "port-reg":
@@ -478,20 +479,20 @@ def main(args: Optional[list] = None) -> int:
                 return 0
             elif parsed.command == "flash-read":
                 addr = int(parsed.address, 16)
-                dump = card.read_flash(addr, parsed.count)
-                for addr, val in sorted(dump.values.items()):
+                flash_dump = card.read_flash(addr, parsed.count)
+                for addr, val in sorted(flash_dump.values.items()):
                     print(f"{addr:08x}: {val:08x}")
                 return 0
             elif parsed.command == "i2c-read":
                 addr = int(parsed.address, 16)
                 reg = int(parsed.register, 16)
-                result = card.i2c_read(addr, parsed.connector, parsed.channel, parsed.bytes, reg)
-                print(f"Data: {' '.join(f'{b:02x}' for b in result.data)}")
+                read_result = card.i2c_read(addr, parsed.connector, parsed.channel, parsed.bytes, reg)
+                print(f"Data: {' '.join(f'{b:02x}' for b in read_result.data)}")
                 return 0
             elif parsed.command == "i2c-write":
                 addr = int(parsed.address, 16)
-                data = [int(b, 16) for b in parsed.data]
-                result = card.i2c_write(addr, parsed.connector, parsed.channel, data)
+                write_data = [int(b, 16) for b in parsed.data]
+                write_result = card.i2c_write(addr, parsed.connector, parsed.channel, write_data)
                 print("Written successfully")
                 return 0
             else:

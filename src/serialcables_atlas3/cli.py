@@ -486,13 +486,15 @@ def main(args: Optional[list[str]] = None) -> int:
             elif parsed.command == "i2c-read":
                 addr = int(parsed.address, 16)
                 reg = int(parsed.register, 16)
-                read_result = card.i2c_read(addr, parsed.connector, parsed.channel, parsed.bytes, reg)
+                read_result = card.i2c_read(
+                    addr, parsed.connector, parsed.channel, parsed.bytes, reg
+                )
                 print(f"Data: {' '.join(f'{b:02x}' for b in read_result.data)}")
                 return 0
             elif parsed.command == "i2c-write":
                 addr = int(parsed.address, 16)
                 write_data = [int(b, 16) for b in parsed.data]
-                write_result = card.i2c_write(addr, parsed.connector, parsed.channel, write_data)
+                card.i2c_write(addr, parsed.connector, parsed.channel, write_data)
                 print("Written successfully")
                 return 0
             else:

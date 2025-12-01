@@ -2,13 +2,7 @@
 
 import pytest
 
-from serialcables_atlas3 import (
-    LinkSpeed,
-    LinkStatus,
-    OperationMode,
-    PortType,
-    SpreadMode,
-)
+from serialcables_atlas3 import LinkSpeed, LinkStatus, OperationMode, PortType, SpreadMode
 from serialcables_atlas3.exceptions import InvalidParameterError, ParseError
 from serialcables_atlas3.models import (
     BistResult,
@@ -344,11 +338,7 @@ class TestImports:
     """Test package imports."""
 
     def test_main_imports(self):
-        from serialcables_atlas3 import (
-            Atlas3,
-            Atlas3Error,
-            LinkSpeed,
-        )
+        from serialcables_atlas3 import Atlas3, Atlas3Error, LinkSpeed
 
         assert Atlas3 is not None
         assert Atlas3Error is not None

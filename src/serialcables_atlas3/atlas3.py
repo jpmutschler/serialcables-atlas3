@@ -6,11 +6,7 @@ from typing import Callable, List, Optional, Union
 import serial
 from serial.tools import list_ports
 
-from .exceptions import (
-    ConnectionError,
-    InvalidParameterError,
-    TimeoutError,
-)
+from .exceptions import ConnectionError, InvalidParameterError, TimeoutError
 from .models import (
     AllErrorCounters,
     BistResult,

@@ -41,7 +41,7 @@ jobs:
     - name: Run linting
       run: |
         black --check src tests
-        isort --check-only src tests
+        isort --check-only --diff src tests
         ruff check src tests
     
     - name: Run type checking

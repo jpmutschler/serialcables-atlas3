@@ -4,7 +4,7 @@
 import argparse
 import json
 import sys
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 from . import Atlas3, __version__
 from .exceptions import Atlas3Error
@@ -215,7 +215,7 @@ Examples:
     return parser
 
 
-def format_output(data: dict[str, Any], as_json: bool) -> str:
+def format_output(data: Dict[str, Any], as_json: bool) -> str:
     """Format output data."""
     if as_json:
         return json.dumps(data, indent=2, default=str)
@@ -300,7 +300,7 @@ def cmd_ports(card: Atlas3, args: argparse.Namespace) -> int:
     """Handle ports command."""
     status = card.get_port_status()
 
-    def port_to_dict(port: PortInfo) -> dict[str, Any]:
+    def port_to_dict(port: PortInfo) -> Dict[str, Any]:
         return {
             "station": port.station,
             "port": port.port_number,
@@ -341,7 +341,7 @@ def cmd_bist(card: Atlas3, args: argparse.Namespace) -> int:
     return 0 if result.all_passed else 1
 
 
-def main(args: Optional[list[str]] = None) -> int:
+def main(args: Optional[List[str]] = None) -> int:
     """Main entry point."""
     parser = create_parser()
     parsed = parser.parse_args(args)

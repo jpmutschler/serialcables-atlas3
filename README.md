@@ -384,7 +384,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Related Products
 
-- **PCI5-ENC8-E3-08**: Gen6 PCIe 8-bay E3 passive JBOF
-- **PCI6-AD-MX8-X16**: MCIO x8 to PCIe x16 adapter
-- **MCIO6-8X-2X8B**: MCIO x8 Y-cables
-- **MCIO6-8X-EDSFFX2-1X4**: MCIO x8 to 2x EDSFF cables
+- **PCI6-AD-x16HI-BG6-144**: Gen6 x16 – 4, x8 MCIO Host Card w/ 1x16 Straddle Mount Connector (A0 144-lane Switch)8-bay E3 passive JBOF
+

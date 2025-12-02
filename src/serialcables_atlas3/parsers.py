@@ -3,6 +3,15 @@
 import re
 from typing import Dict, List, Optional
 
+# Regex pattern to strip ANSI escape codes from terminal output
+ANSI_ESCAPE_PATTERN = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from text."""
+    return ANSI_ESCAPE_PATTERN.sub("", text)
+
+
 from .exceptions import ParseError
 from .models import (
     AllErrorCounters,
@@ -117,6 +126,9 @@ def parse_lsd(response: str) -> HostCardInfo:
 
 def _parse_port_line(line: str, port_type: PortType) -> Optional[PortInfo]:
     """Parse a single port line from showport output."""
+    # Strip ANSI color codes from the line
+    line = _strip_ansi(line)
+
     # Pattern for port lines like:
     # Stn7 | Con00 | Port 112 | Speed: Gen4 | Width: 4 | Max: Gen6 x4 | Status: Degraded
     # Stn2 | USP00 | Port 032 | Speed: Gen4 | Width: 4 | Max: Gen6 x16 | Status: Degraded

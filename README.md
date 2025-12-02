@@ -75,7 +75,7 @@ with Atlas3("/dev/ttyUSB0") as card:
     ports = card.get_port_status()
     for port in ports.ext_mcio_ports:
         if port.is_linked:
-            print(f"Port {port.port_number}: {port.negotiated_speed.value} x{port.negotiated_width}")
+            print(f"Port {port.port_number}: {port.speed} x{port.width}")
     
     # Run built-in self-test
     bist = card.run_bist()
@@ -160,15 +160,20 @@ print(ports.chip_version)  # "A0"
 
 for port in ports.ext_mcio_ports:
     print(f"Port {port.port_number}:")
-    print(f"  Station: {port.station}")
-    print(f"  Status: {port.status.value}")  # "Active", "Degraded", or "Idle"
+    print(f"  Station: {port.station_name}")      # "Stn7", "Stn8"
+    print(f"  Connector: {port.connector}")       # "Con00", "Con01"
+    print(f"  Status: {port.status_str}")         # "Active", "Degraded", "Idle"
+    print(f"  Linked: {port.is_linked}")          # True if width > 0
     if port.is_linked:
-        print(f"  Speed: {port.negotiated_speed.value}")  # "Gen6"
-        print(f"  Width: x{port.negotiated_width}")
-    print(f"  Max: {port.max_speed.value} x{port.max_width}")
+        print(f"  Speed: {port.speed}")           # "Gen4", "Gen5", "Gen6"
+        print(f"  Width: x{port.width}")          # 4, 8, 16
+    print(f"  Max: {port.max_speed_str}")         # "Gen6 x4", "Gen6 x16"
 
 # Check for degraded links
 degraded = [p for p in ports.ext_mcio_ports if p.is_degraded]
+
+# Check for linked ports
+linked = [p for p in ports.int_mcio_ports if p.is_linked]
 ```
 
 ### Error Counters

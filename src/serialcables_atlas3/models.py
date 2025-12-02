@@ -156,9 +156,34 @@ class PortInfo:
     port_type: PortType
 
     @property
+    def station_name(self) -> str:
+        """Get station as string (e.g., 'Stn2', 'Stn7')."""
+        return f"Stn{self.station}"
+
+    @property
+    def speed(self) -> Optional[str]:
+        """Get negotiated speed as string (e.g., 'Gen4', 'Gen5')."""
+        return self.negotiated_speed.value if self.negotiated_speed else None
+
+    @property
+    def width(self) -> int:
+        """Get negotiated width (alias for negotiated_width)."""
+        return self.negotiated_width
+
+    @property
+    def max_speed_str(self) -> str:
+        """Get max speed as combined string (e.g., 'Gen6 x16', 'Gen6 x4')."""
+        return f"{self.max_speed.value} x{self.max_width}"
+
+    @property
+    def status_str(self) -> str:
+        """Get status as string (e.g., 'Degraded', 'Idle', 'Active')."""
+        return self.status.value
+
+    @property
     def is_linked(self) -> bool:
-        """Check if port has an active link."""
-        return self.status != LinkStatus.IDLE
+        """Check if port has an active link (Width > 0)."""
+        return self.negotiated_width > 0
 
     @property
     def is_degraded(self) -> bool:

@@ -153,7 +153,7 @@ def _parse_port_line(line: str, port_type: PortType) -> Optional[PortInfo]:
 
     return PortInfo(
         station=station,
-        connector=connector if not connector.startswith("USP") else None,
+        connector=connector,
         port_number=port_number,
         negotiated_speed=neg_speed,
         negotiated_width=width,

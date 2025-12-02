@@ -119,7 +119,7 @@ class Atlas3:
             self._serial = serial.Serial(
                 port=self.port,
                 baudrate=self.baudrate,
-                timeout=self.timeout,
+                timeout=0.1,  # Short timeout for responsive reading
                 write_timeout=self.timeout,
                 bytesize=serial.EIGHTBITS,
                 parity=serial.PARITY_NONE,
@@ -128,10 +128,10 @@ class Atlas3:
             # Clear any pending data
             self._serial.reset_input_buffer()
             self._serial.reset_output_buffer()
-            # Send a newline to get a prompt
-            time.sleep(0.1)
+            # Send a newline to get a prompt and wait for it
             self._serial.write(b"\r\n")
-            time.sleep(0.2)
+            self._serial.flush()
+            self._wait_for_prompt(self.timeout)
             self._serial.reset_input_buffer()
         except serial.SerialException as e:
             raise ConnectionError(self.port, str(e))
@@ -141,6 +141,40 @@ class Atlas3:
         if self._serial and self._serial.is_open:
             self._serial.close()
         self._serial = None
+
+    def _wait_for_prompt(self, timeout: float) -> str:
+        """
+        Wait for the command prompt to appear.
+
+        Args:
+            timeout: Maximum time to wait in seconds
+
+        Returns:
+            Data received up to and including the prompt
+
+        Raises:
+            TimeoutError: If prompt not received within timeout
+        """
+        if self._serial is None:
+            raise ConnectionError(self.port, "Not connected to device")
+
+        buffer = b""
+        start_time = time.time()
+
+        while True:
+            elapsed = time.time() - start_time
+            if elapsed > timeout:
+                raise TimeoutError("wait_for_prompt", timeout)
+
+            # Read available data (non-blocking due to short serial timeout)
+            chunk = self._serial.read(self._serial.in_waiting or 1)
+            if chunk:
+                buffer += chunk
+                # Check if prompt is in buffer
+                if self.PROMPT.encode("utf-8") in buffer:
+                    break
+
+        return buffer.decode("utf-8", errors="replace")
 
     def _send_command(
         self,
@@ -168,43 +202,31 @@ class Atlas3:
             raise ConnectionError(self.port, "Not connected to device")
 
         timeout = timeout or self.timeout
-        original_timeout = self._serial.timeout
-        self._serial.timeout = timeout
 
-        try:
-            # Clear buffers
-            self._serial.reset_input_buffer()
+        # Clear buffers
+        self._serial.reset_input_buffer()
 
-            # Send command
-            cmd_bytes = (command + self.NEWLINE).encode("utf-8")
-            self._serial.write(cmd_bytes)
-            self._serial.flush()
+        # Send command
+        cmd_bytes = (command + self.NEWLINE).encode("utf-8")
+        self._serial.write(cmd_bytes)
+        self._serial.flush()
 
-            # Read response
-            response_lines = []
+        if wait_for_prompt:
+            # Wait for prompt using efficient buffer-based approach
+            response = self._wait_for_prompt(timeout)
+        else:
+            # Read for a fixed time if not waiting for prompt
             start_time = time.time()
+            buffer = b""
+            while time.time() - start_time < timeout:
+                chunk = self._serial.read(self._serial.in_waiting or 1)
+                if chunk:
+                    buffer += chunk
+            response = buffer.decode("utf-8", errors="replace")
 
-            while True:
-                if time.time() - start_time > timeout:
-                    raise TimeoutError(command, timeout)
-
-                line = self._serial.readline()
-                if line:
-                    decoded = line.decode("utf-8", errors="replace").strip()
-                    response_lines.append(decoded)
-
-                    # Check for prompt indicating command completion
-                    if wait_for_prompt and self.PROMPT in decoded:
-                        break
-
-                # Small delay to prevent busy waiting
-                time.sleep(0.01)
-
-            response = "\n".join(response_lines)
-            return response
-
-        finally:
-            self._serial.timeout = original_timeout
+        # Clean up response - split into lines and rejoin
+        lines = [line.strip() for line in response.splitlines() if line.strip()]
+        return "\n".join(lines)
 
     @staticmethod
     def find_devices() -> List[str]:

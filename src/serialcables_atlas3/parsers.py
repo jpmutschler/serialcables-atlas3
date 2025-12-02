@@ -3,15 +3,6 @@
 import re
 from typing import Dict, List, Optional
 
-# Regex pattern to strip ANSI escape codes from terminal output
-ANSI_ESCAPE_PATTERN = re.compile(r"\x1b\[[0-9;]*m")
-
-
-def _strip_ansi(text: str) -> str:
-    """Remove ANSI escape codes from text."""
-    return ANSI_ESCAPE_PATTERN.sub("", text)
-
-
 from .exceptions import ParseError
 from .models import (
     AllErrorCounters,
@@ -39,6 +30,14 @@ from .models import (
     VersionInfo,
     VoltageInfo,
 )
+
+# Regex pattern to strip ANSI escape codes from terminal output
+ANSI_ESCAPE_PATTERN = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from text."""
+    return ANSI_ESCAPE_PATTERN.sub("", text)
 
 
 def parse_version(response: str) -> VersionInfo:

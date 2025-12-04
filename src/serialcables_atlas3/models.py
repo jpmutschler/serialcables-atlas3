@@ -2,7 +2,8 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional
+import json
+from typing import Any, Dict, List, Optional
 
 
 class LinkSpeed(Enum):
@@ -255,6 +256,36 @@ class ErrorCounters:
             ]
         )
 
+    @property
+    def total_errors(self) -> int:
+        """Sum of all error counters for this port."""
+        return (
+            self.port_rx
+            + self.bad_tlp
+            + self.bad_dllp
+            + self.rec_diag
+            + self.link_down
+            + self.flit_error
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "port_number": self.port_number,
+            "port_rx": self.port_rx,
+            "bad_tlp": self.bad_tlp,
+            "bad_dllp": self.bad_dllp,
+            "rec_diag": self.rec_diag,
+            "link_down": self.link_down,
+            "flit_error": self.flit_error,
+            "has_errors": self.has_errors,
+            "total_errors": self.total_errors,
+        }
+
+    def to_json(self, indent: Optional[int] = None) -> str:
+        """Convert to JSON string."""
+        return json.dumps(self.to_dict(), indent=indent)
+
 
 @dataclass
 class AllErrorCounters:
@@ -265,10 +296,55 @@ class AllErrorCounters:
     @property
     def total_errors(self) -> int:
         """Sum of all error counters."""
-        return sum(
-            c.port_rx + c.bad_tlp + c.bad_dllp + c.rec_diag + c.link_down + c.flit_error
-            for c in self.counters
-        )
+        return sum(c.total_errors for c in self.counters)
+
+    @property
+    def ports_with_errors(self) -> List[ErrorCounters]:
+        """Get list of ports that have errors."""
+        return [c for c in self.counters if c.has_errors]
+
+    def get_port(self, port_number: int) -> Optional[ErrorCounters]:
+        """Get error counters for a specific port number."""
+        for counter in self.counters:
+            if counter.port_number == port_number:
+                return counter
+        return None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "counters": [c.to_dict() for c in self.counters],
+            "total_errors": self.total_errors,
+            "port_count": len(self.counters),
+        }
+
+    def to_json(self, indent: Optional[int] = None) -> str:
+        """Convert to JSON string."""
+        return json.dumps(self.to_dict(), indent=indent)
+
+    def to_dataframe(self) -> Any:
+        """
+        Convert to pandas DataFrame for data analysis.
+
+        Returns:
+            pandas.DataFrame with port error data
+
+        Raises:
+            ImportError: If pandas is not installed
+
+        Example:
+            >>> counters = card.get_error_counters()
+            >>> df = counters.to_dataframe()
+            >>> df[df['has_errors'] == True]  # Filter ports with errors
+        """
+        try:
+            import pandas as pd  # type: ignore[import-untyped]
+        except ImportError:
+            raise ImportError(
+                "pandas is required for to_dataframe(). Install with: pip install pandas"
+            )
+
+        return pd.DataFrame([c.to_dict() for c in self.counters])
 
 
 @dataclass

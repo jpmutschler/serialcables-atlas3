@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: serialcables-atlas3
-Version: 0.1.0
+Version: 0.1.5
 Summary: Python API for Serial Cables Atlas3 PCIe Gen6 Host Adapter Card
 Author-email: Serial Cables <support@serialcables.com>
 Maintainer-email: Serial Cables <support@serialcables.com>
@@ -31,10 +31,12 @@ Requires-Dist: pyserial>=3.5
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0; extra == "dev"
 Requires-Dist: pytest-cov>=4.0; extra == "dev"
-Requires-Dist: black>=23.0; extra == "dev"
-Requires-Dist: isort>=5.12; extra == "dev"
-Requires-Dist: mypy>=1.0; extra == "dev"
+Requires-Dist: black>=23.0; python_version >= "3.9" and extra == "dev"
+Requires-Dist: black<25.0,>=22.0; python_version == "3.8" and extra == "dev"
+Requires-Dist: isort<6.0,>=5.12; extra == "dev"
+Requires-Dist: mypy>=1.0; python_version >= "3.9" and extra == "dev"
 Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: types-pyserial>=3.5; extra == "dev"
 Provides-Extra: docs
 Requires-Dist: sphinx>=6.0; extra == "docs"
 Requires-Dist: sphinx-rtd-theme>=1.0; extra == "docs"
@@ -117,7 +119,7 @@ with Atlas3("/dev/ttyUSB0") as card:
     ports = card.get_port_status()
     for port in ports.ext_mcio_ports:
         if port.is_linked:
-            print(f"Port {port.port_number}: {port.negotiated_speed.value} x{port.negotiated_width}")
+            print(f"Port {port.port_number}: {port.speed} x{port.width}")
     
     # Run built-in self-test
     bist = card.run_bist()
@@ -202,15 +204,20 @@ print(ports.chip_version)  # "A0"
 
 for port in ports.ext_mcio_ports:
     print(f"Port {port.port_number}:")
-    print(f"  Station: {port.station}")
-    print(f"  Status: {port.status.value}")  # "Active", "Degraded", or "Idle"
+    print(f"  Station: {port.station_name}")      # "Stn7", "Stn8"
+    print(f"  Connector: {port.connector}")       # "Con00", "Con01"
+    print(f"  Status: {port.status_str}")         # "Active", "Degraded", "Idle"
+    print(f"  Linked: {port.is_linked}")          # True if width > 0
     if port.is_linked:
-        print(f"  Speed: {port.negotiated_speed.value}")  # "Gen6"
-        print(f"  Width: x{port.negotiated_width}")
-    print(f"  Max: {port.max_speed.value} x{port.max_width}")
+        print(f"  Speed: {port.speed}")           # "Gen4", "Gen5", "Gen6"
+        print(f"  Width: x{port.width}")          # 4, 8, 16
+    print(f"  Max: {port.max_speed_str}")         # "Gen6 x4", "Gen6 x16"
 
 # Check for degraded links
 degraded = [p for p in ports.ext_mcio_ports if p.is_degraded]
+
+# Check for linked ports
+linked = [p for p in ports.int_mcio_ports if p.is_linked]
 ```
 
 ### Error Counters
@@ -226,6 +233,25 @@ for c in counters.counters:
         print(f"  Bad TLP: {c.bad_tlp}")
         print(f"  Bad DLLP: {c.bad_dllp}")
         print(f"  Flit Error: {c.flit_error}")
+
+# Query specific port
+port_32 = counters.get_port(32)
+if port_32:
+    print(f"Port 32 total errors: {port_32.total_errors}")
+
+# Get only ports with errors
+for port in counters.ports_with_errors:
+    print(f"Port {port.port_number}: {port.total_errors} errors")
+
+# Serialize to JSON
+json_str = counters.to_json(indent=2)
+
+# Convert to dictionary
+data = counters.to_dict()
+
+# Convert to pandas DataFrame (requires pandas)
+df = counters.to_dataframe()
+errors_df = df[df['has_errors'] == True]
 
 # Clear error counters
 card.clear_error_counters()
@@ -426,7 +452,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Related Products
 
-- **PCI5-ENC8-E3-08**: Gen6 PCIe 8-bay E3 passive JBOF
-- **PCI6-AD-MX8-X16**: MCIO x8 to PCIe x16 adapter
-- **MCIO6-8X-2X8B**: MCIO x8 Y-cables
-- **MCIO6-8X-EDSFFX2-1X4**: MCIO x8 to 2x EDSFF cables
+- **PCI6-AD-x16HI-BG6-144**: Gen6 x16 – 4, x8 MCIO Host Card w/ 1x16 Straddle Mount Connector (A0 144-lane Switch)8-bay E3 passive JBOF
+

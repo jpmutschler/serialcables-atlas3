@@ -190,6 +190,25 @@ for c in counters.counters:
         print(f"  Bad DLLP: {c.bad_dllp}")
         print(f"  Flit Error: {c.flit_error}")
 
+# Query specific port
+port_32 = counters.get_port(32)
+if port_32:
+    print(f"Port 32 total errors: {port_32.total_errors}")
+
+# Get only ports with errors
+for port in counters.ports_with_errors:
+    print(f"Port {port.port_number}: {port.total_errors} errors")
+
+# Serialize to JSON
+json_str = counters.to_json(indent=2)
+
+# Convert to dictionary
+data = counters.to_dict()
+
+# Convert to pandas DataFrame (requires pandas)
+df = counters.to_dataframe()
+errors_df = df[df['has_errors'] == True]
+
 # Clear error counters
 card.clear_error_counters()
 ```
